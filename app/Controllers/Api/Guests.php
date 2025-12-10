@@ -18,46 +18,34 @@ class Guests extends ResourceController
 
     public function create()
     {
-        // 1. Ambil Data Teks (Menggunakan getPost karena Form Data)
         $userID      = $this->request->getPost('userID');
         $fullName    = $this->request->getPost('fullName');
         $email       = $this->request->getPost('email');
         $affiliation = $this->request->getPost('affiliation');
-        $phone       = $this->request->getPost('phone'); // Field Baru
+        $phone       = $this->request->getPost('phone');
 
-        // 2. Handle Upload Foto
-        $photoUrl = null;
-        $filePhoto = $this->request->getFile('photo'); // Nama field di form: 'photo'
+        // Handle Upload Foto
+        $photoUrl = '-'; // Default jika tidak ada foto
+        $filePhoto = $this->request->getFile('photo');
 
         if ($filePhoto && $filePhoto->isValid() && ! $filePhoto->hasMoved()) {
-            // Generate nama file acak
             $newName = $filePhoto->getRandomName();
-            // Pindahkan ke folder public/uploads/guests
             $filePhoto->move('uploads/guests', $newName);
-            // Simpan URL lengkapnya
             $photoUrl = base_url('uploads/guests/' . $newName);
-        } else {
-            // Jika tidak upload, pakai gambar default
-            $photoUrl = '-';
         }
 
-        // 3. Susun Data
         $data = [
             'userID'        => $userID,
             'fullName'      => $fullName,
             'email'         => $email,
             'affiliation'   => $affiliation,
-            'phone'         => $phone,     // Masuk ke database
-            'photoUrl'      => $photoUrl,  // Masuk ke database
-            'faceEmbedding' => '',         // Kosongkan dulu
+            'phone'         => $phone,
+            'photoUrl'      => $photoUrl,
+            'faceEmbedding' => '',
         ];
 
         if ($this->model->save($data)) {
-            return $this->respondCreated([
-                'status' => 201,
-                'message' => 'Data Tamu & Foto tersimpan',
-                'data' => $data
-            ]);
+            return $this->respondCreated(['status' => 201, 'message' => 'Data Tamu & Foto tersimpan', 'data' => $data]);
         }
         return $this->fail($this->model->errors());
     }
@@ -66,5 +54,37 @@ class Guests extends ResourceController
     {
         $data = $this->model->find($id);
         return $data ? $this->respond($data) : $this->failNotFound('Tamu tidak ditemukan');
+    }
+
+    // --- LOGIKA HAPUS DATA BESERTA FOTO ---
+    public function delete($id = null)
+    {
+        // 1. Cari data tamu dulu
+        $guest = $this->model->find($id);
+
+        if (!$guest) {
+            return $this->failNotFound('Tamu tidak ditemukan');
+        }
+
+        // 2. Hapus File Foto Fisik (Jika ada dan bukan default)
+        $photoUrl = $guest['photoUrl'];
+        if ($photoUrl && $photoUrl != '-' && strpos($photoUrl, 'http') !== false) {
+            // Ambil nama file dari URL
+            $fileName = basename($photoUrl);
+            // Lokasi file di server
+            $filePath = FCPATH . 'uploads/guests/' . $fileName;
+
+            // Hapus jika file ada
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+
+        // 3. Hapus data dari database
+        if ($this->model->delete($id)) {
+            return $this->respondDeleted(['status' => 200, 'message' => 'Data Tamu dan Foto berhasil dihapus']);
+        }
+
+        return $this->failServerError('Gagal menghapus data');
     }
 }

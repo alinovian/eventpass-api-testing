@@ -3,6 +3,8 @@
 namespace App\Controllers\Api;
 
 use App\Models\EventModel;
+use App\Models\GuestModel;
+use App\Models\EventGuestModel;
 use CodeIgniter\RESTful\ResourceController;
 
 class Events extends ResourceController
@@ -10,7 +12,6 @@ class Events extends ResourceController
     protected $modelName = 'App\Models\EventModel';
     protected $format    = 'json';
 
-    // GET: Ambil semua event
     public function index()
     {
         $userID = $this->request->getVar('userID');
@@ -22,10 +23,9 @@ class Events extends ResourceController
         return $this->respond($data);
     }
 
-    // POST: Tambah Event
     public function create()
     {
-        // getVar otomatis baca JSON atau Form Data
+        // Menggunakan getVar (Bisa JSON/Form)
         $data = [
             'userID'      => $this->request->getVar('userID'),
             'name'        => $this->request->getVar('name'),
@@ -41,24 +41,10 @@ class Events extends ResourceController
         return $this->fail($this->model->errors());
     }
 
-    // PUT: Update Event
     public function update($id = null)
     {
-        // Ambil data (support JSON untuk PUT)
-        $data = [
-            'id'          => $id,
-            'userID'      => $this->request->getVar('userID'),
-            'name'        => $this->request->getVar('name'),
-            'date'        => $this->request->getVar('date'),
-            'time'        => $this->request->getVar('time'),
-            'location'    => $this->request->getVar('location'),
-            'description' => $this->request->getVar('description'),
-        ];
-
-        // Hapus field yang kosong (agar tidak menimpa data lama dengan null)
-        $data = array_filter($data, function ($value) {
-            return !is_null($value);
-        });
+        $data = $this->request->getRawInput();
+        $data['id'] = $id;
 
         if ($this->model->save($data)) {
             return $this->respond(['status' => 200, 'message' => 'Event berhasil diupdate']);
@@ -72,11 +58,64 @@ class Events extends ResourceController
         return $data ? $this->respond($data) : $this->failNotFound('Event tidak ditemukan');
     }
 
+    // --- LOGIKA HAPUS EVENT + BERSIHKAN TAMU YATIM PIATU ---
     public function delete($id = null)
     {
-        if ($this->model->delete($id)) {
-            return $this->respondDeleted(['status' => 200, 'message' => 'Event berhasil dihapus']);
+        $eventGuestModel = new EventGuestModel();
+        $guestModel      = new GuestModel();
+
+        // 1. Cek apakah Event ada
+        if (!$this->model->find($id)) {
+            return $this->failNotFound('Event tidak ditemukan');
         }
-        return $this->failNotFound('Event tidak ditemukan');
+
+        // 2. AMBIL DAFTAR PESERTA di event ini (Sebelum dihapus)
+        // Kita butuh ID tamu mereka untuk pengecekan nanti
+        $guestsInThisEvent = $eventGuestModel->where('eventID', $id)->findAll();
+
+        // 3. Hapus Event-nya
+        // (Tiket di tabel eventGuests otomatis terhapus karena settingan CASCADE di database)
+        $this->model->delete($id);
+
+        // 4. CEK & BERSIHKAN TAMU (Orphan Removal)
+        $deletedGuestCount = 0;
+
+        foreach ($guestsInThisEvent as $ticket) {
+            $guestID = $ticket['guestID'];
+
+            // Cek: Apakah Tamu ini masih punya tiket di event LAIN?
+            // Kita hitung jumlah tiket dia yang tersisa di tabel eventGuests
+            $sisaTiket = $eventGuestModel->where('guestID', $guestID)->countAllResults();
+
+            if ($sisaTiket == 0) {
+                // ARTINYA: Dia tidak punya event lain lagi.
+                // SAATNYA HAPUS TAMU INI & FOTONYA demi kebersihan database.
+
+                // A. Hapus Foto Fisik
+                $guestData = $guestModel->find($guestID);
+                if ($guestData) {
+                    $photoUrl = $guestData['photoUrl'];
+                    // Pastikan url valid untuk dihapus
+                    if ($photoUrl && $photoUrl != '-' && strpos($photoUrl, 'http') !== false) {
+                        $fileName = basename($photoUrl);
+                        $filePath = FCPATH . 'uploads/guests/' . $fileName;
+
+                        if (file_exists($filePath)) {
+                            unlink($filePath); // Hapus file dari folder
+                        }
+                    }
+                }
+
+                // B. Hapus Data Tamu dari Tabel Guests
+                $guestModel->delete($guestID);
+                $deletedGuestCount++;
+            }
+            // Jika $sisaTiket > 0, biarkan saja (karena dia masih aktif di event lain)
+        }
+
+        return $this->respondDeleted([
+            'status' => 200,
+            'message' => "Event dihapus. $deletedGuestCount tamu yang tidak terdaftar di event lain juga telah dihapus bersih."
+        ]);
     }
 }
