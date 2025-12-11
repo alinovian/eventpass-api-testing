@@ -15,17 +15,21 @@ class Guests extends ResourceController
         $data = $userID ? $this->model->where('userID', $userID)->findAll() : $this->model->findAll();
         return $this->respond($data);
     }
-
+    
     public function create()
     {
-        $userID      = $this->request->getPost('userID');
-        $fullName    = $this->request->getPost('fullName');
-        $email       = $this->request->getPost('email');
-        $affiliation = $this->request->getPost('affiliation');
-        $phone       = $this->request->getPost('phone');
+        // 1. Ambil Data Teks
+        $userID        = $this->request->getPost('userID');
+        $fullName      = $this->request->getPost('fullName');
+        $email         = $this->request->getPost('email');
+        $affiliation   = $this->request->getPost('affiliation');
+        $phone         = $this->request->getPost('phone');
+        
+        // AMBIL DATA VECTOR WAJAH (String JSON)
+        $faceEmbedding = $this->request->getPost('faceEmbedding'); 
 
-        // Handle Upload Foto
-        $photoUrl = '-'; // Default jika tidak ada foto
+        // 2. Handle Upload Foto
+        $photoUrl = '-';
         $filePhoto = $this->request->getFile('photo');
 
         if ($filePhoto && $filePhoto->isValid() && ! $filePhoto->hasMoved()) {
@@ -34,6 +38,7 @@ class Guests extends ResourceController
             $photoUrl = base_url('uploads/guests/' . $newName);
         }
 
+        // 3. Susun Data
         $data = [
             'userID'        => $userID,
             'fullName'      => $fullName,
@@ -41,11 +46,15 @@ class Guests extends ResourceController
             'affiliation'   => $affiliation,
             'phone'         => $phone,
             'photoUrl'      => $photoUrl,
-            'faceEmbedding' => '',
+            'faceEmbedding' => $faceEmbedding, // Simpan Vector disini
         ];
 
         if ($this->model->save($data)) {
-            return $this->respondCreated(['status' => 201, 'message' => 'Data Tamu & Foto tersimpan', 'data' => $data]);
+            return $this->respondCreated([
+                'status' => 201, 
+                'message' => 'Data Tamu, Foto & Vector Wajah tersimpan',
+                'data' => $data
+            ]);
         }
         return $this->fail($this->model->errors());
     }
