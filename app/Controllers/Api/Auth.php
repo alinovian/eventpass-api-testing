@@ -20,11 +20,16 @@ class Auth extends ResourceController
     {
         $model = new UserModel();
 
-        // Validasi input
+        // Validasi input dengan Pesan Custom
         if (!$this->validate([
             'fullName' => 'required',
             'email'    => 'required|valid_email|is_unique[users.email]',
-            'password' => 'required|min_length(6)'
+            'password' => 'required|min_length[6]'
+        ], [
+            // TAMBAHKAN BAGIAN INI UNTUK CUSTOM MESSAGE
+            'email' => [
+                'is_unique' => 'Email sudah terdaftar'
+            ]
         ])) {
             return $this->fail($this->validator->getErrors());
         }
