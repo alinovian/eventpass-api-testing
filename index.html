@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventPass Full System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .phone-frame {
+            width: 100%;
+            max-width: 375px;
+            height: 812px;
+            border: 12px solid #1f2937;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            background: white;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #1f2937;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            z-index: 100;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            background-color: #ffffff;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+        }
+
+        .active {
+            display: flex;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .camera-bg {
+            background-color: #000;
+            background-image: radial-gradient(circle, transparent 20%, #000 70%);
+        }
+
+        .toggle-checkbox:checked {
+            left: auto;
+            right: 4px;
+            border-color: #2563eb;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #2563eb;
+        }
+
+        .pie-chart {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .pie-chart-inner {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="text-center mt-4 mb-2">
+        <h1 class="text-2xl font-bold text-gray-800">EventPass</h1>
+        <p class="text-gray-600 text-sm">Sistem Validasi Event Cerdas</p>
+    </div>
+
+    <!-- Phone Container -->
+    <div class="phone-frame">
+        <div class="notch"></div>
+
+        <!-- LOGIN SCREEN -->
+        <div id="screen-login" class="screen active p-8 justify-center bg-blue-600 text-white z-50">
+            <div class="text-center mb-10 fade-in">
+                <div class="w-20 h-20 bg-white rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg">
+                    <i class="fas fa-qrcode text-4xl text-blue-600"></i>
+                </div>
+                <h1 class="text-3xl font-bold tracking-tight">EventPass</h1>
+                <p class="opacity-80 text-sm mt-1">Sistem Validasi Event Cerdas</p>
+            </div>
+
+            <div class="space-y-4 fade-in">
+                <div>
+                    <label class="text-xs font-semibold opacity-80 uppercase tracking-wider">Email</label>
+                    <input type="email" value="alinovian.edu@gmail.com"
+                        class="w-full bg-blue-500/50 border border-blue-400 rounded-xl p-3 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 transition">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold opacity-80 uppercase tracking-wider">Password</label>
+                    <input type="password" value="123456"
+                        class="w-full bg-blue-500/50 border border-blue-400 rounded-xl p-3 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 transition">
+                </div>
+                <button onclick="goTo('screen-dashboard')"
+                    class="w-full bg-white text-blue-600 font-bold py-3.5 rounded-xl shadow-lg hover:bg-blue-50 transition transform active:scale-95 mt-2">
+                    Masuk Sekarang
+                </button>
+                <div class="text-center mt-4">
+                    <p class="text-xs opacity-70">Belum punya akun? <span class="font-bold underline cursor-pointer"
+                            onclick="goTo('screen-register')">Daftar disini</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- REGISTER SCREEN -->
+        <div id="screen-register" class="screen p-8 justify-center bg-blue-600 text-white z-50">
+            <div class="text-center mb-8 fade-in">
+                <h1 class="text-3xl font-bold tracking-tight">Buat Akun</h1>
+                <p class="opacity-80 text-sm mt-1">Bergabung dengan EventPass</p>
+            </div>
+
+            <div class="space-y-4 fade-in">
+                <div>
+                    <label class="text-xs font-semibold opacity-80 uppercase tracking-wider">Nama Lengkap</label>
+                    <input type="text" placeholder="Nama Anda"
+                        class="w-full bg-blue-500/50 border border-blue-400 rounded-xl p-3 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 transition">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold opacity-80 uppercase tracking-wider">Email</label>
+                    <input type="email" placeholder="email@contoh.com"
+                        class="w-full bg-blue-500/50 border border-blue-400 rounded-xl p-3 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 transition">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold opacity-80 uppercase tracking-wider">Password</label>
+                    <input type="password" placeholder="******"
+                        class="w-full bg-blue-500/50 border border-blue-400 rounded-xl p-3 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white/50 transition">
+                </div>
+                <button onclick="simulateRegister()"
+                    class="w-full bg-white text-blue-600 font-bold py-3.5 rounded-xl shadow-lg hover:bg-blue-50 transition transform active:scale-95 mt-2">
+                    Daftar Sekarang
+                </button>
+                <div class="text-center mt-4">
+                    <p class="text-xs opacity-70">Sudah punya akun? <span class="font-bold underline cursor-pointer"
+                            onclick="goTo('screen-login')">Masuk disini</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="screen-dashboard" class="screen bg-gray-50">
+            <!-- Header -->
+            <div class="bg-white p-6 pb-4 shadow-sm z-10 pt-12">
+                <div class="mb-4">
+                    <p class="text-xs text-gray-500 font-medium">Selamat Datang,</p>
+                    <h2 class="text-2xl font-bold text-gray-800">Ali Novian</h2>
+                </div>
+
+                <!-- Status Bar & Action -->
+                <div class="flex justify-between items-center">
+                    <!-- Status Badge -->
+                    <div
+                        class="px-4 py-1.5 bg-green-100 rounded-full flex items-center space-x-2 border border-green-200">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-[10px] font-bold text-green-700 tracking-widest">ONLINE</span>
+                    </div>
+
+                    <!-- Create Button -->
+                    <button onclick="goTo('screen-event-form')"
+                        class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition active:scale-95 shadow-lg">
+                        <i class="fas fa-plus text-xs mr-2"></i>
+                        <span class="text-xs font-bold">Buat Acara</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content List -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 pb-24 no-scrollbar">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Daftar Acara Anda</h3>
+
+                <!-- Event Item 1 -->
+                <div
+                    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition relative">
+                    <!-- Background & Context Buttons -->
+                    <div class="absolute top-2 right-2 flex space-x-1 z-10">
+                        <button onclick="event.stopPropagation(); goTo('screen-edit-event')"
+                            class="w-7 h-7 bg-white/90 backdrop-blur rounded-full shadow text-gray-500 hover:text-blue-600 flex items-center justify-center text-xs">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button onclick="event.stopPropagation(); confirmDelete('Acara')"
+                            class="w-7 h-7 bg-white/90 backdrop-blur rounded-full shadow text-gray-500 hover:text-red-600 flex items-center justify-center text-xs">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <!-- Banner Area -->
+                    <div onclick="goTo('screen-scanner')" class="cursor-pointer">
+                        <div class="h-28 bg-blue-600 flex items-end p-4 relative">
+                            <div
+                                class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10">
+                            </div>
+                            <h3
+                                class="font-bold text-white text-lg leading-tight relative z-0 shadow-black drop-shadow-md">
+                                Wisuda Angkatan 35</h3>
+                        </div>
+                    </div>
+
+                    <!-- Action Area -->
+                    <div class="p-4">
+                        <div class="flex justify-between items-center text-sm text-gray-600 mb-3">
+                            <span class="flex items-center"><i class="far fa-calendar-alt w-5 text-gray-400"></i> 25 Nov
+                                2025</span>
+                            <span class="text-gray-600 text-sm flex items-center"><i
+                                    class="far fa-clock mr-1 text-gray-400"></i>08:00</span>
+                        </div>
+
+                        <!-- Realtime Attendance Counter -->
+                        <div
+                            class="flex items-center justify-between bg-blue-50 rounded-lg px-3 py-2 mb-3 border border-blue-200">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-check-circle text-blue-600 text-sm"></i>
+                                <span class="text-xs text-gray-600">Kehadiran:</span>
+                                <span class="font-bold text-blue-600" id="realtime-counter-dashboard">127</span>
+                                <span class="text-gray-400 text-xs">/</span>
+                                <span class="text-gray-600 text-sm">200</span>
+                            </div>
+                            <span class="text-sm font-bold text-blue-600" id="percentage-counter-dashboard">64%</span>
+                        </div>
+
+                        <!-- SPLIT ACTIONS -->
+                        <div class="flex justify-between items-center border-t pt-3 gap-3">
+                            <!-- Kelola Peserta -->
+                            <button onclick="openGuestList('dashboard')"
+                                class="flex-1 flex items-center justify-center px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-xs font-bold text-gray-700 border border-gray-200">
+                                <i class="fas fa-users mr-2 text-gray-400"></i> Kelola Peserta
+                            </button>
+
+                            <!-- Masuk (Go to Scanner) -->
+                            <button onclick="goTo('screen-scanner')"
+                                class="flex items-center text-xs text-blue-600 font-bold hover:translate-x-1 transition">
+                                Mulai Scan <i class="fas fa-chevron-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Item 2 -->
+                <div
+                    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition relative">
+                    <!-- Background & Context Buttons -->
+                    <div class="absolute top-2 right-2 flex space-x-1 z-10">
+                        <button onclick="event.stopPropagation(); goTo('screen-edit-event')"
+                            class="w-7 h-7 bg-white/90 backdrop-blur rounded-full shadow text-gray-500 hover:text-blue-600 flex items-center justify-center text-xs">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button onclick="event.stopPropagation(); confirmDelete('Acara')"
+                            class="w-7 h-7 bg-white/90 backdrop-blur rounded-full shadow text-gray-500 hover:text-red-600 flex items-center justify-center text-xs">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <!-- Banner Area -->
+                    <div onclick="goTo('screen-scanner')" class="cursor-pointer">
+                        <div class="h-28 bg-blue-600 flex items-end p-4 relative">
+                            <div
+                                class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10">
+                            </div>
+                            <h3
+                                class="font-bold text-white text-lg leading-tight relative z-0 shadow-black drop-shadow-md">
+                                Seminar Teknologi AI</h3>
+                        </div>
+                    </div>
+
+                    <!-- Action Area -->
+                    <div class="p-4">
+                        <div class="flex justify-between items-center text-sm text-gray-600 mb-3">
+                            <span class="flex items-center"><i class="far fa-calendar-alt w-5 text-gray-400"></i> 28 Nov
+                                2025</span>
+                            <span class="text-gray-600 text-sm flex items-center"><i
+                                    class="far fa-clock mr-1 text-gray-400"></i>14:00</span>
+                        </div>
+
+                        <!-- Realtime Attendance Counter -->
+                        <div
+                            class="flex items-center justify-between bg-blue-50 rounded-lg px-3 py-2 mb-3 border border-blue-200">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-check-circle text-blue-600 text-sm"></i>
+                                <span class="text-xs text-gray-600">Kehadiran:</span>
+                                <span class="font-bold text-blue-600">89</span>
+                                <span class="text-gray-400 text-xs">/</span>
+                                <span class="text-gray-600 text-sm">150</span>
+                            </div>
+                            <span class="text-sm font-bold text-blue-600">59%</span>
+                        </div>
+
+                        <!-- SPLIT ACTIONS -->
+                        <div class="flex justify-between items-center border-t pt-3 gap-3">
+                            <!-- 1. Kelola Peserta (Open Guestlist in EDIT Mode) -->
+                            <button onclick="openGuestList('dashboard')"
+                                class="flex-1 flex items-center justify-center px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-xs font-bold text-gray-700 border border-gray-200">
+                                <i class="fas fa-users mr-2 text-gray-400"></i> Kelola Peserta
+                            </button>
+
+                            <!-- Masuk (Go to Scanner) -->
+                            <button onclick="goTo('screen-scanner')"
+                                class="flex items-center text-xs text-blue-600 font-bold hover:translate-x-1 transition">
+                                Mulai Scan <i class="fas fa-chevron-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom NavigationBar -->
+            <div
+                class="bg-white border-t p-2 flex justify-around text-gray-400 absolute bottom-0 w-full pb-6 shadow-[0_-5px_10px_rgba(0,0,0,0.02)] z-40">
+                <button onclick="goTo('screen-dashboard')"
+                    class="flex flex-col items-center text-blue-600 w-16 p-1 rounded-lg">
+                    <i class="fas fa-home text-xl mb-1"></i>
+                    <span class="text-[10px] font-bold">Beranda</span>
+                </button>
+                <button onclick="goTo('screen-reports')"
+                    class="flex flex-col items-center w-16 p-1 rounded-lg hover:bg-gray-50 hover:text-gray-600 transition">
+                    <i class="fas fa-chart-pie text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Laporan</span>
+                </button>
+                <button onclick="goTo('screen-settings')"
+                    class="flex flex-col items-center w-16 p-1 rounded-lg hover:bg-gray-50 hover:text-gray-600 transition">
+                    <i class="fas fa-user text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Akun</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN: REPORTS LIST -->
+        <div id="screen-reports" class="screen bg-gray-50">
+            <div class="bg-white p-6 pb-4 shadow-sm z-10 pt-12">
+                <h2 class="text-lg font-bold text-gray-800">Laporan Acara</h2>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 pb-24 no-scrollbar">
+                <!-- Report Card 1 -->
+                <div onclick="goTo('screen-report-detail')"
+                    class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition">
+                    <div class="flex items-center space-x-4">
+                        <div class="pie-chart">
+                            <div class="pie-chart-inner">64%</div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-sm">Wisuda Angkatan 35</h3>
+                            <p class="text-[10px] text-gray-500">25 Nov 2025 • 08:00</p>
+                            <p class="text-[10px] text-blue-600 font-bold mt-1">127/200 Hadir</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300"></i>
+                </div>
+
+                <!-- Report Card 2 -->
+                <div onclick="goTo('screen-report-detail')"
+                    class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition">
+                    <div class="flex items-center space-x-4">
+                        <div class="pie-chart">
+                            <div class="pie-chart-inner">59%</div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-sm">Seminar Teknologi AI</h3>
+                            <p class="text-[10px] text-gray-500">28 Nov 2025 • 14:00</p>
+                            <p class="text-[10px] text-blue-600 font-bold mt-1">89/150 Hadir</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-300"></i>
+                </div>
+            </div>
+
+            <!-- Bottom NavigationBar -->
+            <div
+                class="bg-white border-t p-2 flex justify-around text-gray-400 absolute bottom-0 w-full pb-6 shadow-[0_-5px_10px_rgba(0,0,0,0.02)] z-40">
+                <button onclick="goTo('screen-dashboard')"
+                    class="flex flex-col items-center w-16 p-1 rounded-lg hover:bg-gray-50 hover:text-gray-600 transition">
+                    <i class="fas fa-home text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Beranda</span>
+                </button>
+                <button class="flex flex-col items-center text-blue-600 w-16 p-1 rounded-lg">
+                    <i class="fas fa-chart-pie text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Laporan</span>
+                </button>
+                <button onclick="goTo('screen-settings')"
+                    class="flex flex-col items-center w-16 p-1 rounded-lg hover:bg-gray-50 hover:text-gray-600 transition">
+                    <i class="fas fa-user text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Akun</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN: REPORT DETAIL -->
+        <div id="screen-report-detail" class="screen bg-white z-20">
+            <!-- App Bar / Header -->
+            <div class="bg-white p-4 pt-12 border-b flex items-center sticky top-0 z-20 shadow-sm">
+                <button onclick="goTo('screen-reports')"
+                    class="mr-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><i
+                        class="fas fa-arrow-left text-gray-600"></i></button>
+                <h2 class="font-bold text-gray-800 text-lg">Detail Laporan</h2>
+            </div>
+
+            <!-- Content Body -->
+            <div class="p-4 overflow-y-auto pb-8 fade-in no-scrollbar">
+                <!-- Title Event -->
+                <h1 class="text-xl font-bold text-gray-800 mb-4">Wisuda Angkatan 35</h1>
+
+                <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 mb-6 text-sm text-gray-600 shadow-sm">
+                    <div class="grid gap-4">
+                        <!-- Date -->
+                        <div class="flex items-start">
+                            <div class="w-6 flex-shrink-0 flex justify-center mt-0.5">
+                                <i class="far fa-calendar-alt text-blue-500"></i>
+                            </div>
+                            <span class="font-medium text-gray-700">25 November 2025</span>
+                        </div>
+
+                        <!-- Time -->
+                        <div class="flex items-start">
+                            <div class="w-6 flex-shrink-0 flex justify-center mt-0.5">
+                                <i class="far fa-clock text-blue-500"></i>
+                            </div>
+                            <span class="font-medium text-gray-700">08:00</span>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="flex items-start">
+                            <div class="w-6 flex-shrink-0 flex justify-center mt-0.5">
+                                <i class="fas fa-map-marker-alt text-red-500"></i>
+                            </div>
+                            <span class="font-medium text-gray-700 leading-tight">Aula Utama, Kampus A</span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="flex items-start">
+                            <div class="w-6 flex-shrink-0 flex justify-center mt-0.5">
+                                <i class="fas fa-align-left text-gray-400"></i>
+                            </div>
+                            <p class="font-medium text-gray-700 leading-tight">
+                                Prosesi wisuda untuk lulusan tahun akademik 2024/2025
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 text-center">
+                        <p class="text-[10px] text-blue-400 font-bold uppercase">Total Hadir</p>
+                        <p class="text-2xl font-bold text-blue-700">127</p>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 text-center">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Tidak Hadir</p>
+                        <p class="text-2xl font-bold text-gray-600">73</p>
+                    </div>
+                </div>
+
+                <h3 class="text-xs font-bold text-gray-800 mb-3 flex items-center">
+                    <i class="fas fa-history mr-2 text-blue-500"></i> Log Kehadiran
+                </h3>
+
+                <!-- Log List -->
+                <div class="space-y-0 bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+
+                    <!-- Header Row -->
+                    <div
+                        class="flex justify-between bg-gray-50 p-4 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider sticky top-0">
+                        <span>NAMA</span>
+                        <span>WAKTU SCAN</span>
+                    </div>
+
+                    <!-- Log Entry 1 -->
+                    <div
+                        class="p-4 border-b border-gray-50 flex justify-between items-center hover:bg-blue-50 transition">
+                        <div>
+                            <p class="text-sm font-bold text-gray-800">Budi Santoso</p>
+                            <p class="text-[11px] text-gray-500">VIP • Rektorat</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-gray-800">08:45</p>
+                        </div>
+                    </div>
+
+                    <!-- Log Entry 2 -->
+                    <div
+                        class="p-4 border-b border-gray-50 flex justify-between items-center hover:bg-blue-50 transition">
+                        <div>
+                            <p class="text-sm font-bold text-gray-800">Siti Aminah</p>
+                            <p class="text-[11px] text-gray-500">Reguler • Alumni</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-gray-800">09:10</p>
+                        </div>
+                    </div>
+
+                    <!-- Log Entry 3 -->
+                    <div
+                        class="p-4 border-b border-gray-50 flex justify-between items-center hover:bg-blue-50 transition">
+                        <div>
+                            <p class="text-sm font-bold text-gray-800">Doni Ramadhan</p>
+                            <p class="text-[11px] text-gray-500">Media • Pers</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-gray-800">09:15</p>
+                        </div>
+                    </div>
+
+                    <!-- Log Entry 4 -->
+                    <div
+                        class="p-4 border-b border-gray-50 flex justify-between items-center hover:bg-blue-50 transition">
+                        <div>
+                            <p class="text-sm font-bold text-gray-800">Alya Larasati</p>
+                            <p class="text-[11px] text-gray-500">Reguler</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-gray-800">09:30</p>
+                        </div>
+                    </div>
+
+                    <!-- Log Entry 5 -->
+                    <div
+                        class="p-4 border-b border-gray-50 flex justify-between items-center hover:bg-blue-50 transition">
+                        <div>
+                            <p class="text-sm font-bold text-gray-800">Reza Rahadian</p>
+                            <p class="text-[11px] text-gray-500">VIP • Tamu Khusus</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-gray-800">09:45</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD/EDIT EVENT FORM -->
+        <div id="screen-event-form" class="screen bg-white z-20">
+            <div class="bg-white p-4 pt-12 border-b flex items-center sticky top-0 z-20 shadow-sm">
+                <button onclick="backToDashboard()"
+                    class="text-gray-600 mr-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><i
+                        class="fas fa-arrow-left"></i></button>
+                <h2 class="text-lg font-bold text-gray-800">Form Tambah Acara</h2>
+            </div>
+
+            <!-- Content Body -->
+            <div class="p-6 space-y-5 overflow-y-auto pb-24 fade-in no-scrollbar">
+
+                <!-- Nama Acara -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Nama Acara</label>
+                    <input type="text" placeholder="Contoh: Wisuda 2025"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+
+                <!-- Tanggal & Jam (Grid) -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Tanggal</label>
+                        <div class="relative">
+                            <input type="text" placeholder="dd/mm/yyyy" onfocus="(this.type='date')"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <i class="far fa-calendar text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Jam</label>
+                        <div class="relative">
+                            <input type="text" placeholder="--:--" onfocus="(this.type='time')"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <i class="far fa-clock text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lokasi -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Lokasi</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-map-marker-alt text-gray-400"></i>
+                        </div>
+                        <input type="text" placeholder="Nama Gedung/Hotel"
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 pl-10 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <!-- Deskripsi -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Deskripsi Singkat <span
+                            class="text-gray-400 font-normal text-[10px] ml-1">(Opsional)</span></label>
+                    <textarea
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm h-24 resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none transition"></textarea>
+                </div>
+            </div>
+
+            <!-- Fixed Bottom Button -->
+            <div class="absolute bottom-0 w-full p-4 bg-white border-t shadow-[0_-5px_10px_rgba(0,0,0,0.02)] z-40">
+                <button onclick="simulateSave('Acara berhasil disimpan!')"
+                    class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition active:scale-95">
+                    Simpan Acara
+                </button>
+            </div>
+        </div>
+
+        <!-- EDIT EVENT FORM -->
+        <div id="screen-edit-event" class="screen bg-white z-20">
+            <!-- Header -->
+            <div class="bg-white p-4 pt-12 border-b flex items-center sticky top-0 z-20 shadow-sm">
+                <button onclick="backToDashboard()"
+                    class="text-gray-600 mr-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><i
+                        class="fas fa-arrow-left"></i></button>
+                <h2 class="text-lg font-bold text-gray-800">Edit Data Acara</h2>
+            </div>
+
+            <!-- Content Body -->
+            <div class="p-6 space-y-5 overflow-y-auto pb-24 fade-in no-scrollbar">
+
+                <!-- Nama Acara (Pre-filled) -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Nama Acara</label>
+                    <input type="text" value="Wisuda Angkatan 35"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+
+                <!-- Tanggal & Jam (Grid) - Pre-filled -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Tanggal</label>
+                        <div class="relative">
+                            <input type="date" value="2025-11-25"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <i class="far fa-calendar text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Jam</label>
+                        <div class="relative">
+                            <input type="time" value="08:00"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <i class="far fa-clock text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lokasi -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Lokasi</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-map-marker-alt text-gray-400"></i>
+                        </div>
+                        <input type="text" value="Gedung Utama"
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 pl-10 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <!-- Deskripsi -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Deskripsi Singkat
+                        <span class="text-gray-400 font-normal normal-case">(Opsional)</span>
+                    </label>
+                    <textarea rows="4" placeholder="Deskripsi acara (maks 200 karakter)"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition resize-none">Prosesi wisuda untuk lulusan tahun akademik 2024/2025</textarea>
+                </div>
+
+            </div>
+
+            <!-- Fixed Bottom Button -->
+            <div class="absolute bottom-0 w-full p-4 bg-white border-t shadow-[0_-5px_10px_rgba(0,0,0,0.02)] z-40">
+                <button onclick="simulateSave('Perubahan acara berhasil disimpan!')"
+                    class="w-full bg-blue-600 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition transform active:scale-95">
+                    <i class="fas mr-2"></i> Simpan Perubahan
+                </button>
+            </div>
+        </div>
+
+        <!-- SCANNER SCREEN -->
+        <div id="screen-scanner" class="screen camera-bg text-white relative z-30">
+            <!-- Top Controls -->
+            <div class="absolute top-0 w-full p-4 pt-12 flex justify-between items-center z-20">
+                <button onclick="backToDashboard()"
+                    class="w-10 h-10 bg-black/40 rounded-full flex items-center justify-center backdrop-blur hover:bg-black/60 transition">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div
+                    class="bg-black/40 px-3 py-1 rounded-full backdrop-blur text-sm flex items-center border border-white/10">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></span> Scanning...
+                </div>
+
+                <!-- Flash Button -->
+                <button onclick="toggleFlash()" id="flash-btn"
+                    class="w-10 h-10 bg-black/40 rounded-full flex items-center justify-center backdrop-blur hover:bg-black/60 transition group">
+                    <i class="fas fa-bolt text-yellow-400 group-hover:text-yellow-300"></i>
+                </button>
+            </div>
+
+            <!-- Scanner Visuals -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
+                <div class="w-64 h-64 border-2 border-white/30 rounded-3xl relative overflow-hidden">
+                    <div class="absolute inset-0 border-[3px] border-blue-500 rounded-3xl opacity-50"></div>
+                    <!-- Corner Markers -->
+                    <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-400 rounded-tl-xl">
+                    </div>
+                    <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-400 rounded-tr-xl">
+                    </div>
+                    <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-400 rounded-bl-xl">
+                    </div>
+                    <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-400 rounded-br-xl">
+                    </div>
+
+                    <!-- Scan Line -->
+                    <div
+                        class="w-full h-1 bg-blue-400 shadow-[0_0_15px_#3b82f6] absolute top-0 animate-[scan_2s_infinite_linear]">
+                    </div>
+                </div>
+                <p
+                    class="mt-8 text-sm font-medium bg-black/50 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10">
+                    Arahkan ke QR Code Tamu</p>
+
+                <button onclick="showModalResult()"
+                    class="mt-4 text-[10px] text-gray-400 bg-white/10 px-2 py-1 rounded pointer-events-auto hover:bg-white/20">
+                    [Debug: Simulasi Scan Sukses]
+                </button>
+            </div>
+            <style>
+                @keyframes scan {
+                    0% {
+                        top: 0;
+                    }
+
+                    50% {
+                        top: 100%;
+                    }
+
+                    100% {
+                        top: 0;
+                    }
+                }
+            </style>
+
+            <!-- Bottom Controls -->
+            <div
+                class="absolute bottom-0 w-full bg-white rounded-t-[2rem] p-6 pb-8 text-gray-800 z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.2)]">
+                <!-- Realtime Counter Section -->
+                <div class="bg-blue-50 rounded-xl px-4 py-2.5 mb-4 border border-blue-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase tracking-wide font-semibold mb-0.5">Kehadiran
+                                Realtime</p>
+                            <div class="flex items-baseline space-x-1">
+                                <span class="text-xl font-bold text-blue-600" id="realtime-counter-scanner">127</span>
+                                <span class="text-gray-400 text-sm">/</span>
+                                <span class="text-gray-600 text-sm">200</span>
+                                <span class="text-xs text-gray-500 ml-1">peserta</span>
+                            </div>
+                        </div>
+                        <div class="bg-blue-600 rounded-full w-12 h-12 flex items-center justify-center">
+                            <span class="text-white font-bold text-sm" id="percentage-counter">64%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-end">
+                    <div class="text-center flex-1">
+                        <button onclick="openGuestList('scanner')"
+                            class="flex flex-col items-center text-gray-400 hover:text-blue-600 transition group">
+                            <div
+                                class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center mb-1 group-hover:bg-blue-50">
+                                <i class="fas fa-users text-lg"></i>
+                            </div>
+                            <span class="text-[10px] font-bold">Peserta</span>
+                        </button>
+                    </div>
+
+                    <!-- FACE RECOGNITION BUTTON -->
+                    <div class="flex-1 -mt-14 flex justify-center">
+                        <button onclick="showFaceRecognitionOverlay()"
+                            class="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full shadow-xl shadow-blue-500/30 flex items-center justify-center text-white text-2xl relative z-40 border-[6px] border-white active:scale-95 transition transform hover:shadow-2xl">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+
+                    <div class="text-center flex-1">
+                        <button onclick="showKeyboard()"
+                            class="flex flex-col items-center text-gray-400 hover:text-blue-600 transition group">
+                            <div
+                                class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center mb-1 group-hover:bg-blue-50">
+                                <i class="fas fa-search text-lg"></i>
+                            </div>
+                            <span class="text-[10px] font-bold">Search</span>
+                        </button>
+                    </div>
+                </div>
+                <p class="text-center text-xs text-gray-400 mt-4 font-medium">Tekan kamera untuk check-in biometrik</p>
+            </div>
+
+            <!-- Face Recognition Overlay -->
+            <div id="face-recognition-overlay"
+                class="absolute inset-0 bg-black z-50 flex flex-col items-center justify-center hidden fade-in">
+                <!-- Face Recognition Frame -->
+                <div class="relative flex-1 w-full flex items-center justify-center">
+                    <!-- Face Detection Corners -->
+                    <div class="relative w-64 h-80">
+                        <div class="absolute top-0 left-0 w-8 h-8 border-l-4 border-t-4 border-blue-400"></div>
+                        <div class="absolute top-0 right-0 w-8 h-8 border-r-4 border-t-4 border-blue-400"></div>
+                        <div class="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-blue-400"></div>
+                        <div class="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-blue-400"></div>
+                        
+                        <!-- Face Detection Oval -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-48 h-64 border-2 border-blue-400/60 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bottom Controls -->
+                <div class="absolute bottom-0 w-full p-8 pb-12">
+                    <div class="flex justify-center">
+                        <button onclick="closeFaceRecognitionOverlay()"
+                            class="px-8 py-3 bg-white/10 border border-white/30 text-white rounded-full hover:bg-white/20 text-base font-medium transition backdrop-blur">
+                            Batal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Search Overlay -->
+        <div id="keyboard-overlay" class="absolute inset-0 bg-gray-50 z-40 hidden flex-col">
+            <!-- Header Container -->
+            <div class="bg-white p-4 pt-12 shadow-sm z-10 sticky top-0">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center">
+                        <button onclick="hideKeyboard()"
+                            class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center mr-2 text-gray-600">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <h2 class="text-lg font-bold text-gray-800">Cari Peserta</h2>
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div class="mb-1">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-sm"></i>
+                        <input type="text" id="manual-input-field" placeholder="Cari nama peserta..."
+                            class="w-full bg-gray-100 border-none rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                            oninput="filterParticipants()">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Search Results -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-3 pb-8 no-scrollbar" id="search-results">
+                <!-- Search Result Item 1 -->
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-800">Prof. Dr. Budi Santoso</h3>
+                            <p class="text-sm text-gray-600">VIP • Universitas Indonesia</p>
+                            <p class="text-xs text-gray-500 mt-2">budi.santoso@ui.ac.id</p>
+                        </div>
+                        <button onclick="selectParticipant('Prof. Dr. Budi Santoso', '001')"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                            Pilih
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Search Result Item 2 -->
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-800">Budi Santoso</h3>
+                            <p class="text-sm text-gray-600">Reguler • PT. Teknologi Maju</p>
+                            <p class="text-xs text-gray-500 mt-2">budi.santoso@tekno.com</p>
+                        </div>
+                        <button onclick="selectParticipant('Budi Santoso', '089')"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                            Pilih
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Search Result Item 3 -->
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="font-bold text-gray-800">Dr. Budi Santoso, M.Kom</h3>
+                            <p class="text-sm text-gray-600">VIP • Institut Teknologi</p>
+                            <p class="text-xs text-gray-500 mt-2">dr.budi@institut.ac.id</p>
+                        </div>
+                        <button onclick="selectParticipant('Dr. Budi Santoso, M.Kom', '156')"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                            Pilih
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- No Results Message -->
+                <div id="no-results" class="text-center py-12 hidden">
+                    <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                    <h3 class="text-gray-600 font-medium mb-2">Peserta tidak ditemukan</h3>
+                    <p class="text-gray-500 text-sm">Coba gunakan kata kunci yang berbeda</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- GUEST LIST -->
+        <div id="screen-guestlist" class="screen bg-gray-50 z-20">
+            <!-- Header Container -->
+            <div class="bg-white p-4 pt-12 shadow-sm z-10 sticky top-0">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center">
+                        <!-- Dynamic Back Button -->
+                        <button id="btn-back-guestlist"
+                            class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center mr-2 text-gray-600">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <!-- Dynamic Title ID -->
+                        <h2 id="guestlist-title" class="text-lg font-bold text-gray-800">Daftar Peserta</h2>
+                    </div>
+                </div>
+
+                <!-- Actions Row -->
+                <div id="guestlist-actions" class="flex gap-3 mb-4">
+                    <button onclick="showToast('Mengunduh semua QR Code...')"
+                        class="flex-1 bg-blue-50 text-blue-600 px-4 py-2.5 rounded-xl flex items-center justify-center border border-blue-100 hover:bg-blue-100 transition font-medium text-xs">
+                        <i class="fas fa-file-download mr-2"></i> Download QR
+                    </button>
+                    <button id="btn-add-participant" onclick="goTo('screen-guest-form')"
+                        class="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-xl flex items-center justify-center shadow-lg hover:bg-blue-700 transition font-medium text-xs">
+                        <i class="fas fa-user-plus mr-2"></i> Tambah Peserta
+                    </button>
+                </div>
+
+                <!-- Search -->
+                <div class="mb-1">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400 text-sm"></i>
+                        <input type="text" placeholder="Cari nama peserta..."
+                            class="w-full bg-gray-100 border-none rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 space-y-3 pb-8 no-scrollbar" id="guest-list-container">
+                <!-- Guest Item 1 (Budi Santoso) -->
+                <div
+                    class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex justify-between items-center group relative overflow-hidden">
+                    <div class="flex items-center space-x-3">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm">Budi Santoso</h4>
+                            <p
+                                class="text-[10px] text-gray-500 font-medium bg-gray-100 inline-block px-1.5 rounded mt-0.5">
+                                VIP • Rektorat</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <!-- DASHBOARD MODE: DOWNLOAD QR -->
+                        <button onclick="showToast('QR Code Budi Santoso diunduh')"
+                            class="action-dashboard w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 hover:bg-blue-100 transition hidden">
+                            <i class="fas fa-qrcode text-xs"></i>
+                        </button>
+                        <!-- DASHBOARD MODE: DELETE BUTTON -->
+                        <button onclick="confirmDelete('Peserta')"
+                            class="action-dashboard w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 hover:bg-red-100 transition hidden">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
+
+                        <!-- SCANNER MODE: STATUS TEXT -->
+                        <span
+                            class="status-scanner px-3 py-1 rounded-lg bg-blue-100 text-blue-600 text-xs font-bold hidden">
+                            Hadir
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Guest Item 2 (Siti Aminah) -->
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <div>
+                            <h4 class="font-bold text-gray-800 text-sm">Siti Aminah</h4>
+                            <p class="text-[10px] text-gray-500 font-medium">Reguler • Alumni</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <!-- DASHBOARD MODE: DOWNLOAD QR -->
+                        <button onclick="showToast('QR Code Siti Aminah diunduh')"
+                            class="action-dashboard w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 hover:bg-blue-100 transition hidden">
+                            <i class="fas fa-qrcode text-xs"></i>
+                        </button>
+                        <!-- DASHBOARD MODE: DELETE BUTTON -->
+                        <button onclick="confirmDelete('Peserta')"
+                            class="action-dashboard w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 hover:bg-red-100 transition hidden">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
+
+                        <!-- SCANNER MODE: STATUS TEXT -->
+                        <span
+                            class="status-scanner px-3 py-1 rounded-lg bg-red-100 text-red-600 text-xs font-bold hidden">
+                            Belum Hadir
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD/EDIT GUEST FORM -->
+        <div id="screen-guest-form" class="screen bg-white z-30">
+            <!-- Header -->
+            <div class="bg-white p-4 pt-12 border-b flex items-center sticky top-0 z-20 shadow-sm">
+                <button onclick="openGuestList('dashboard')"
+                    class="text-gray-600 mr-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><i
+                        class="fas fa-arrow-left"></i></button>
+                <h2 class="text-lg font-bold text-gray-800">Data Peserta</h2>
+            </div>
+
+            <div class="p-6 space-y-5 fade-in overflow-y-auto pb-24 no-scrollbar">
+                <!-- Upload Foto Peserta (Paling Atas untuk Preview) -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Foto Peserta</label>
+                    
+                    <!-- Photo Preview Container -->
+                    <div id="photo-preview-container" class="hidden">
+                        <div class="relative w-40 h-40 mx-auto mb-3">
+                            <img id="photo-preview" src="" alt="Preview" class="w-full h-full object-cover rounded-xl border-2 border-blue-200 shadow-lg">
+                            <button onclick="removePhoto()" class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 shadow-lg">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <button onclick="showPhotoOptions()" class="w-full bg-gray-100 border border-gray-200 rounded-xl p-3 text-center hover:bg-gray-200 transition">
+                            <i class="fas fa-edit text-gray-600 mr-2"></i>
+                            <span class="text-sm font-medium text-gray-700">Ganti Foto</span>
+                        </button>
+                    </div>
+
+                    <!-- Upload Box (Single) -->
+                    <div id="upload-box" onclick="showPhotoOptions()" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer">
+                        <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-camera text-gray-500 text-2xl"></i>
+                        </div>
+                        <p class="text-sm font-bold text-gray-700 mb-1">Upload Foto</p>
+                        <p class="text-xs text-gray-500">Ketuk untuk pilih dari kamera atau galeri</p>
+                    </div>
+                    
+                    <!-- Hidden file inputs -->
+                    <input type="file" id="photo-input" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoSelection(event)">
+                    <input type="file" id="gallery-input" accept="image/*" class="hidden" onchange="handlePhotoSelection(event)">
+                </div>
+
+                <!-- Nama Lengkap (Wajib) -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Nama Lengkap</label>
+                    <input type="text" placeholder="Nama Lengkap"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+
+                <!-- Kategori (Wajib) -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Kategori</label>
+                    <div class="relative">
+                        <select
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-600 appearance-none">
+                            <option>Reguler</option>
+                            <option>VIP</option>
+                            <option>Media/Pers</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+                            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instansi (Opsional) -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Instansi / Jabatan <span
+                            class="text-gray-400 font-normal text-[10px] ml-1">(Opsional)</span></label>
+                    <input type="text" placeholder="Contoh: Universitas A / Dosen"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+
+                <!-- Email & HP (Opsional Grid) -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Email <span
+                            class="text-gray-400 font-normal text-[10px] ml-1">(Opsional)</span></label>
+                    <input type="email"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">No. HP <span
+                            class="text-gray-400 font-normal text-[10px] ml-1">(Opsional)</span></label>
+                    <input type="tel"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+            </div>
+
+            <!-- Fixed Bottom Button -->
+            <div class="absolute bottom-0 w-full p-4 bg-white border-t shadow-[0_-5px_10px_rgba(0,0,0,0.02)] z-40">
+                <button onclick="simulateSave('Data peserta disimpan!')"
+                    class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition active:scale-95">
+                    Simpan Data
+                </button>
+            </div>
+        </div>
+
+        <!-- ACCOUNT SETTINGS -->
+        <div id="screen-settings" class="screen bg-gray-50">
+            <!-- Header -->
+            <div class="bg-white p-4 pt-12 shadow-sm z-10">
+                <div class="flex items-center">
+                    <!-- Back Button: Go back to Dashboard -->
+                    <!-- <button onclick="goTo('screen-dashboard')"
+                        class="text-gray-600 mr-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><i
+                            class="fas fa-arrow-left"></i></button> -->
+                    <h2 class="text-lg font-bold text-gray-800">Pengaturan Akun</h2>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto p-4 pb-24 space-y-4 no-scrollbar">
+                <!-- Profile Card -->
+                <div class="flex items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                    <div
+                        class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-2xl text-gray-500 border-2 border-white shadow mr-4 relative">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-gray-800">Ali Novian</h3>
+                        <p class="text-xs text-gray-500">alinovian.edu@gmail.com</p>
+                    </div>
+                </div>
+
+                <!-- Settings Group 1 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <button
+                        class="w-full flex items-center justify-between p-4 border-b border-gray-50 hover:bg-gray-50"
+                        onclick="goTo('screen-edit-profile')">
+                        <div class="flex items-center text-sm font-medium text-gray-700">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3">
+                                <i class="fas fa-user-edit"></i>
+                            </div>
+                            Ubah Data Pengguna
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                    </button>
+                    <button
+                        class="w-full flex items-center justify-between p-4 border-b border-gray-50 hover:bg-gray-50"
+                        onclick="goTo('screen-change-password')">
+                        <div class="flex items-center text-sm font-medium text-gray-700">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            Ganti Password
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                    </button>
+                    <!-- Notification Toggle -->
+                    <div class="w-full flex items-center justify-between p-4 hover:bg-gray-50">
+                        <div class="flex items-center text-sm font-medium text-gray-700">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            Notifikasi
+                        </div>
+
+                        <!-- Toggle Switch Component -->
+                        <div
+                            class="relative inline-block w-10 h-6 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="toggle"
+                                class="toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-4 appearance-none cursor-pointer left-1 top-1 transition-all duration-300"
+                                checked />
+                            <label for="toggle"
+                                class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Group 2 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <button class="w-full flex items-center justify-between p-4 hover:bg-gray-50"
+                        onclick="goTo('screen-help')">
+                        <div class="flex items-center text-sm font-medium text-gray-700">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center mr-3">
+                                <i class="fas fa-question-circle"></i>
+                            </div>
+                            Bantuan & Support
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-300 text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Logout Button -->
+                <button onclick="goTo('screen-login')"
+                    class="w-full bg-red-50 text-red-600 font-bold py-3.5 rounded-xl border border-red-100 mt-6 flex items-center justify-center shadow-sm hover:bg-red-100 transition">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Log Out
+                </button>
+                <p class="text-center text-[10px] text-gray-400 mt-4">Version 1.0 (Beta 3)</p>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div
+                class="bg-white border-t p-2 flex justify-around text-gray-400 absolute bottom-0 w-full pb-6 shadow-[0_-5px_10px_rgba(0,0,0,0.02)] z-40">
+                <button onclick="goTo('screen-dashboard')"
+                    class="flex flex-col items-center w-16 p-1 rounded-lg hover:bg-gray-50 hover:text-gray-600 transition">
+                    <i class="fas fa-home text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Beranda</span>
+                </button>
+
+                <button onclick="goTo('screen-reports')"
+                    class="flex flex-col items-center w-16 p-1 rounded-lg hover:bg-gray-50 hover:text-gray-600 transition">
+                    <i class="fas fa-chart-pie text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Laporan</span>
+                </button>
+
+                <button class="flex flex-col items-center text-blue-600 w-16 p-1 rounded-lg">
+                    <i class="fas fa-user text-xl mb-1"></i>
+                    <span class="text-[10px] font-bold">Akun</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- UBAH DATA PENGGUNA -->
+        <div id="screen-edit-profile" class="screen bg-white z-30">
+            <div class="bg-white p-4 pt-12 border-b flex items-center sticky top-0 z-20 shadow-sm">
+                <button onclick="goTo('screen-settings')"
+                    class="text-gray-600 mr-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><i
+                        class="fas fa-arrow-left"></i></button>
+                <h2 class="text-lg font-bold text-gray-800">Ubah Data Pengguna</h2>
+            </div>
+
+            <div class="p-6 space-y-5 fade-in">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Nama Lengkap</label>
+                    <input type="text" value="Ali Novian"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Email</label>
+                    <input type="email" value="alinovian.edu@gmail.com"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+                <button onclick="simulateSave('Data pengguna berhasil diubah!')"
+                    class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition mt-4">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </div>
+
+        <!-- GANTI PASSWORD -->
+        <div id="screen-change-password" class="screen bg-white z-30">
+            <div class="bg-white p-4 pt-12 border-b flex items-center sticky top-0 z-20 shadow-sm">
+                <button onclick="goTo('screen-settings')"
+                    class="text-gray-600 mr-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><i
+                        class="fas fa-arrow-left"></i></button>
+                <h2 class="text-lg font-bold text-gray-800">Ganti Password</h2>
+            </div>
+
+            <div class="p-6 space-y-5 fade-in">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Password Lama</label>
+                    <input type="password" placeholder="******"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Password Baru</label>
+                    <input type="password" placeholder="******"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Konfirmasi Password</label>
+                    <input type="password" placeholder="******"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+                </div>
+                <button onclick="simulateSave('Password berhasil diganti!')"
+                    class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition mt-4">
+                    Simpan Password
+                </button>
+            </div>
+        </div>
+
+        <!-- BANTUAN & SUPPORT -->
+        <div id="screen-help" class="screen bg-white z-30">
+            <div class="bg-white p-4 pt-12 border-b flex items-center sticky top-0 z-20 shadow-sm">
+                <button onclick="goTo('screen-settings')"
+                    class="text-gray-600 mr-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><i
+                        class="fas fa-arrow-left"></i></button>
+                <h2 class="text-lg font-bold text-gray-800">Bantuan & Support</h2>
+            </div>
+
+            <div class="p-6 space-y-5 fade-in text-center pt-10">
+                <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-headset text-4xl text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Hubungi Kami</h3>
+                <p class="text-gray-500 text-sm mb-8">Jika Anda mengalami kendala, silakan hubungi tim developer kami.
+                </p>
+
+                <div class="space-y-3">
+                    <a href="#"
+                        class="block w-full bg-gray-50 border border-gray-200 p-4 rounded-xl flex items-center hover:bg-gray-100 transition">
+                        <div
+                            class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm mr-4">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs text-gray-500 font-bold uppercase">Email Developer</p>
+                            <p class="text-sm text-gray-800 font-medium">support@eventpass.id</p>
+                        </div>
+                    </a>
+
+                    <a href="#"
+                        class="block w-full bg-gray-50 border border-gray-200 p-4 rounded-xl flex items-center hover:bg-gray-100 transition">
+                        <div
+                            class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-500 shadow-sm mr-4">
+                            <i class="fab fa-whatsapp text-xl"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs text-gray-500 font-bold uppercase">WhatsApp</p>
+                            <p class="text-sm text-gray-800 font-medium">+62 812-3456-7890</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALS & TOASTS -->
+        <!-- SUCCESS MODAL -->
+        <div id="modal-success"
+            class="absolute inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-6 fade-in">
+            <div class="bg-white rounded-[2.5rem] w-full max-w-sm p-6 text-center shadow-2xl relative overflow-hidden">
+                <!-- Blue Check Icon -->
+                <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-3xl text-blue-500"></i>
+                </div>
+
+                <!-- Title & Time -->
+                <h2 class="text-2xl font-bold text-gray-800 mb-1">Tiket Valid!</h2>
+                <!-- <p class="text-xs text-gray-500 mb-6">Senin, 25 Nov • 08:45 WIB</p> -->
+
+                <!-- Participant Card -->
+                <div
+                    class="bg-gray-50 rounded-2xl p-4 text-left border border-gray-100 mb-6 flex relative overflow-hidden">
+                    <div class="w-1.5 bg-blue-500 absolute left-0 top-0 bottom-0"></div>
+                    <div class="pl-3 w-full">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">PESERTA</p>
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Prof. Dr. Budi Santoso</h3>
+                        <div class="flex items-center">
+                            <span
+                                class="px-3 py-1 bg-yellow-100 text-yellow-700 text-[10px] font-bold rounded border border-yellow-200">VIP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button onclick="closeModal()"
+                    class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-blue-700 transition">
+                    Scan Lagi
+                </button>
+            </div>
+        </div>
+
+        <!-- Guest Options -->
+        <div id="modal-guest-options" class="absolute inset-0 bg-black/50 z-50 hidden flex items-end fade-in">
+            <!-- Simplified for brevity in this snippet -->
+            <div class="bg-white w-full rounded-t-3xl p-6 pb-10">
+                <h3 class="text-center font-bold mb-4">Opsi Tamu</h3>
+                <button onclick="closeModal()" class="w-full bg-gray-100 py-3 rounded-xl">Batal</button>
+            </div>
+        </div>
+
+        <!-- Photo Options Modal (Android-like) -->
+        <div id="modal-photo-options" class="absolute inset-0 bg-black/50 z-60 hidden flex items-end fade-in">
+            <div class="bg-white w-full rounded-t-3xl p-6 pb-10">
+                <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+                <h3 class="text-center font-bold text-gray-800 mb-6">Pilih Foto</h3>
+                
+                <div class="space-y-3">
+                    <button onclick="selectCamera()" class="w-full flex items-center p-4 hover:bg-gray-50 rounded-xl transition">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-camera text-blue-600 text-lg"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-semibold text-gray-800">Ambil Foto</p>
+                            <p class="text-sm text-gray-500">Gunakan kamera</p>
+                        </div>
+                    </button>
+                    
+                    <button onclick="selectGallery()" class="w-full flex items-center p-4 hover:bg-gray-50 rounded-xl transition">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-image text-green-600 text-lg"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-semibold text-gray-800">Pilih dari Galeri</p>
+                            <p class="text-sm text-gray-500">Pilih foto yang ada</p>
+                        </div>
+                    </button>
+                </div>
+                
+                <button onclick="closePhotoModal()" class="w-full bg-gray-100 text-gray-700 font-semibold py-4 rounded-xl mt-6 hover:bg-gray-200 transition">
+                    Batal
+                </button>
+            </div>
+        </div>
+
+        <div id="toast"
+            class="absolute top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-xl text-sm font-medium transition opacity-0 pointer-events-none z-[60] flex items-center min-w-[200px] justify-center">
+            <i class="fas fa-check-circle text-blue-400 mr-2"></i> <span id="toast-msg">Berhasil!</span>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Navigation Logic ---
+        function goTo(screenId) {
+            // Fade out current
+            const active = document.querySelector('.screen.active');
+            if (active) active.classList.remove('active');
+
+            // Show new
+            const next = document.getElementById(screenId);
+            if (next) {
+                next.classList.add('active');
+                next.classList.add('fade-in');
+                setTimeout(() => next.classList.remove('fade-in'), 300);
+            }
+        }
+
+        function backToDashboard() {
+            goTo('screen-dashboard');
+        }
+
+        // --- New Smart Navigation for Guest List ---
+        // Helper to manage state based on source (Scanner vs Dashboard)
+        function openGuestList(source) {
+            const btnAdd = document.getElementById('btn-add-participant');
+            const btnBack = document.getElementById('btn-back-guestlist');
+            const actionsRow = document.getElementById('guestlist-actions');
+            const title = document.getElementById('guestlist-title');
+
+            // Reset state
+            if (actionsRow) actionsRow.classList.remove('hidden');
+            document.querySelectorAll('.action-dashboard').forEach(el => el.classList.remove('hidden'));
+            document.querySelectorAll('.status-scanner').forEach(el => el.classList.add('hidden'));
+
+            if (source === 'scanner') {
+                // Came from Scanner -> View Only Mode
+                if (actionsRow) actionsRow.classList.add('hidden'); // Hide Top Actions
+                btnBack.setAttribute('onclick', "goTo('screen-scanner')"); // Back to Scanner
+                title.innerText = "Daftar Hadir Peserta"; // Update Title
+
+                // Toggle list item actions
+                document.querySelectorAll('.action-dashboard').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.status-scanner').forEach(el => el.classList.remove('hidden'));
+            } else {
+                // Came from Dashboard -> Manage Mode
+                btnBack.setAttribute('onclick', "goTo('screen-dashboard')"); // Back to Dashboard
+                title.innerText = "Daftar Peserta"; // Update Title
+
+                // Toggle list item actions
+                document.querySelectorAll('.action-dashboard').forEach(el => el.classList.remove('hidden'));
+                document.querySelectorAll('.status-scanner').forEach(el => el.classList.add('hidden'));
+            }
+
+            goTo('screen-guestlist');
+        }
+
+        // --- Scanner Features Logic ---
+        let flashActive = false;
+        function toggleFlash() {
+            flashActive = !flashActive;
+            const btn = document.getElementById('flash-btn');
+            const icon = btn.querySelector('i');
+
+            if (flashActive) {
+                icon.classList.remove('text-yellow-400');
+                icon.classList.add('text-white');
+                btn.classList.add('bg-blue-600');
+                btn.classList.remove('bg-black/40');
+                showToast("Flash Menyala");
+            } else {
+                icon.classList.add('text-yellow-400');
+                icon.classList.remove('text-white');
+                btn.classList.remove('bg-blue-600');
+                btn.classList.add('bg-black/40');
+                showToast("Flash Mati");
+            }
+        }
+
+        function showKeyboard() {
+            const keyboardOverlay = document.getElementById('keyboard-overlay');
+            keyboardOverlay.classList.remove('hidden');
+            keyboardOverlay.classList.add('flex', 'fade-in');
+            document.getElementById('manual-input-field').focus();
+        }
+
+        function hideKeyboard() {
+            const keyboardOverlay = document.getElementById('keyboard-overlay');
+            keyboardOverlay.classList.add('hidden');
+            keyboardOverlay.classList.remove('flex', 'fade-in');
+        }
+
+        function filterParticipants() {
+            const input = document.getElementById('manual-input-field').value.toLowerCase();
+            const searchResults = document.getElementById('search-results');
+            const noResults = document.getElementById('no-results');
+            
+            if (input.length < 3) {
+                // Show all results when less than 3 characters
+                searchResults.style.display = 'block';
+                noResults.classList.add('hidden');
+                return;
+            }
+            
+            // Simple filter simulation - in real app this would be API call
+            const allResults = searchResults.children;
+            let hasResults = false;
+            
+            for (let i = 0; i < allResults.length; i++) {
+                const result = allResults[i];
+                if (result.id === 'no-results') continue;
+                
+                const name = result.querySelector('h3').textContent.toLowerCase();
+                const email = result.querySelector('.text-xs.text-gray-500').textContent.toLowerCase();
+                
+                if (name.includes(input) || email.includes(input)) {
+                    result.style.display = 'block';
+                    hasResults = true;
+                } else {
+                    result.style.display = 'none';
+                }
+            }
+            
+            // Show no results message if no matches
+            if (!hasResults) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+        }
+        
+        function selectParticipant(name, id) {
+            // Simulate participant selection
+            hideKeyboard();
+            showToast(`Peserta ${name} (ID: ${id}) berhasil dipilih`);
+            setTimeout(() => {
+                showModalResult();
+            }, 1000);
+        }
+
+        // --- Features Logic ---
+        function showFaceRecognitionOverlay() {
+            // Face recognition logic
+            document.getElementById('face-recognition-overlay').classList.remove('hidden');
+            document.getElementById('face-recognition-overlay').classList.add('flex');
+            setTimeout(() => {
+                closeFaceRecognitionOverlay();
+                showModalResult();
+            }, 4000); // Longer timeout for face recognition process
+        }
+
+        function closeFaceRecognitionOverlay() {
+            document.getElementById('face-recognition-overlay')?.classList.add('hidden');
+            document.getElementById('face-recognition-overlay')?.classList.remove('flex');
+        }
+
+        function showModalResult() {
+            document.getElementById('modal-success').classList.remove('hidden');
+        }
+
+        function showGuestOptions(name) {
+            document.getElementById('modal-guest-options').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.querySelectorAll('[id^="modal-"]').forEach(el => el.classList.add('hidden'));
+        }
+
+        function confirmDelete(itemType) {
+            // Modified to show a slightly different message for delete vs attendance check
+            // but keeping it simple as requested "Delete Icon"
+            if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                showToast(`${itemType} berhasil dihapus`);
+            }
+        }
+
+        function simulateRegister() {
+            const btn = event.currentTarget;
+            btn.innerHTML = 'Memproses...';
+            setTimeout(() => {
+                btn.innerHTML = 'Daftar Sekarang';
+                showToast('Akun berhasil dibuat!');
+                goTo('screen-login');
+            }, 1000);
+        }
+
+        function simulateSave(msg) {
+            const btn = event.currentTarget;
+            const originalText = btn.innerText;
+            
+            // Validation for guest form - check if photo is uploaded
+            const activeScreen = document.querySelector('.screen.active');
+            if (activeScreen.id === 'screen-guest-form' && msg.includes('peserta')) {
+                const photoPreview = document.getElementById('photo-preview-container');
+                if (photoPreview.classList.contains('hidden')) {
+                    showToast('Foto peserta diperlukan untuk Face Recognition');
+                    return;
+                }
+            }
+            
+            btn.innerHTML = 'Menyimpan...';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                showToast(msg);
+
+                // Smart redirection based on context
+                // Since this form is only accessible via Dashboard -> GuestList -> Add
+                // It should return to GuestList
+                if (activeScreen.id === 'screen-guest-form') {
+                    goTo('screen-guestlist');
+                } else if (msg.includes('Acara')) {
+                    goTo('screen-dashboard');
+                } else if (msg.includes('Email') || msg.includes('Password') || msg.includes('pengguna')) {
+                    goTo('screen-settings');
+                }
+            }, 1000);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = message;
+            toast.classList.remove('opacity-0');
+            toast.style.top = '50px';
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                toast.style.top = '40px';
+            }, 2500);
+        }
+
+        // --- Realtime Counter Simulation ---
+        let attendanceCount = 127;
+        const totalGuests = 200;
+
+        function updateRealtimeCounter() {
+            // Update Dashboard Counter
+            const dashboardCounter = document.getElementById('realtime-counter-dashboard');
+            if (dashboardCounter) dashboardCounter.innerText = attendanceCount;
+
+            // Update Scanner Counter
+            const scannerCounter = document.getElementById('realtime-counter-scanner');
+            if (scannerCounter) scannerCounter.innerText = attendanceCount;
+
+            // Update Percentage
+            const percentage = Math.round((attendanceCount / totalGuests) * 100);
+
+            const percentageCounter = document.getElementById('percentage-counter');
+            if (percentageCounter) percentageCounter.innerText = percentage;
+
+            const percentageCounterDashboard = document.getElementById('percentage-counter-dashboard');
+            if (percentageCounterDashboard) percentageCounterDashboard.innerText = percentage + '%';
+
+            // Update Progress Bar
+            const progressBar = document.getElementById('progress-bar');
+            if (progressBar) progressBar.style.width = percentage + '%';
+        }
+
+        // Simulate realtime update when scan is successful
+        function simulateRealtimeIncrement() {
+            attendanceCount++;
+            updateRealtimeCounter();
+
+            // Add pulse animation to counters
+            const scannerCounter = document.getElementById('realtime-counter-scanner');
+            if (scannerCounter) {
+                scannerCounter.style.transition = 'transform 0.2s';
+                scannerCounter.style.transform = 'scale(1.3)';
+                setTimeout(() => scannerCounter.style.transform = 'scale(1)', 200);
+            }
+
+            const dashboardCounter = document.getElementById('realtime-counter-dashboard');
+            if (dashboardCounter) {
+                dashboardCounter.style.transition = 'transform 0.2s';
+                dashboardCounter.style.transform = 'scale(1.3)';
+                setTimeout(() => dashboardCounter.style.transform = 'scale(1)', 200);
+            }
+        }
+
+        // Initialize counter on page load
+        window.addEventListener('DOMContentLoaded', function () {
+            updateRealtimeCounter();
+
+            // Override showModalResult to include counter update
+            const originalModalElement = document.getElementById('modal-success');
+            if (originalModalElement) {
+                const observer = new MutationObserver(function (mutations) {
+                    mutations.forEach(function (mutation) {
+                        if (mutation.attributeName === 'class') {
+                            if (!originalModalElement.classList.contains('hidden')) {
+                                simulateRealtimeIncrement();
+                            }
+                        }
+                    });
+                });
+                observer.observe(originalModalElement, { attributes: true });
+            }
+        });
+
+        // --- Photo Upload Functions for Face Recognition ---
+        function showPhotoOptions() {
+            // Show Android-like photo options modal
+            document.getElementById('modal-photo-options').classList.remove('hidden');
+        }
+
+        function closePhotoModal() {
+            // Close photo options modal
+            document.getElementById('modal-photo-options').classList.add('hidden');
+        }
+
+        function selectCamera() {
+            closePhotoModal();
+            const photoInput = document.getElementById('photo-input');
+            photoInput.click();
+        }
+
+        function selectGallery() {
+            closePhotoModal();
+            const galleryInput = document.getElementById('gallery-input');
+            galleryInput.click();
+        }
+
+        function handlePhotoSelection(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showToast('Format file tidak didukung. Pilih file gambar.');
+                    return;
+                }
+
+                // Validate file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('Ukuran file terlalu besar. Maksimal 5MB.');
+                    return;
+                }
+
+                // Create file reader to preview image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewImg = document.getElementById('photo-preview');
+                    const previewContainer = document.getElementById('photo-preview-container');
+                    const uploadBox = document.getElementById('upload-box');
+                    
+                    // Set preview image
+                    previewImg.src = e.target.result;
+                    
+                    // Show preview, hide upload box
+                    previewContainer.classList.remove('hidden');
+                    uploadBox.classList.add('hidden');
+                    
+                    showToast('Foto berhasil dipilih untuk Face Recognition');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removePhoto() {
+            const previewContainer = document.getElementById('photo-preview-container');
+            const uploadBox = document.getElementById('upload-box');
+            const photoInput = document.getElementById('photo-input');
+            const galleryInput = document.getElementById('gallery-input');
+            
+            // Clear inputs
+            photoInput.value = '';
+            galleryInput.value = '';
+            
+            // Hide preview, show upload box
+            previewContainer.classList.add('hidden');
+            uploadBox.classList.remove('hidden');
+            
+            showToast('Foto dihapus');
+        }
+    </script>
+</body>
+
+</html>

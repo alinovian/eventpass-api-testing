@@ -17,10 +17,10 @@ class EventGuestModel extends Model
     public function getTicketDetail($qrcode)
     {
         return $this->select('eventGuests.*, guests.fullName, guestCategories.name as category')
-                    ->join('guests', 'guests.id = eventGuests.guestID')
-                    ->join('guestCategories', 'guestCategories.id = eventGuests.categoryID')
-                    ->where('qrcode', $qrcode)
-                    ->first();
+            ->join('guests', 'guests.id = eventGuests.guestID')
+            ->join('guestCategories', 'guestCategories.id = eventGuests.categoryID')
+            ->where('qrcode', $qrcode)
+            ->first();
     }
 
     protected bool $allowEmptyInserts = false;

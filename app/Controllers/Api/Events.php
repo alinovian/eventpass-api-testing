@@ -58,7 +58,6 @@ class Events extends ResourceController
         return $data ? $this->respond($data) : $this->failNotFound('Event tidak ditemukan');
     }
 
-    // --- LOGIKA HAPUS EVENT + BERSIHKAN TAMU YATIM PIATU ---
     public function delete($id = null)
     {
         $eventGuestModel = new EventGuestModel();
