@@ -43,12 +43,37 @@ class Events extends ResourceController
 
     public function update($id = null)
     {
-        $data = $this->request->getRawInput();
-        $data['id'] = $id;
+        // 1. Coba ambil sebagai JSON (Cara Frontend bekerja)
+        $input = $this->request->getJSON(true); // true = return as array
 
-        if ($this->model->save($data)) {
+        // 2. Jika JSON kosong, coba ambil sebagai Raw Input (Cara Postman form-urlencoded bekerja)
+        if (!$input) {
+            $input = $this->request->getRawInput();
+        }
+
+        // 3. Jika masih kosong juga (misal user pakai POST biasa tapi nyasar ke route PUT), coba getVar
+        if (!$input) {
+            $input = $this->request->getVar(); // Fallback terakhir
+            // Note: getVar returnnya mungkin mixed, pastikan jadi array
+            if (!is_array($input)) {
+                $input = [];
+            }
+        }
+
+        // Gabungkan ID dari URL ke dalam data input
+        $input['id'] = $id;
+
+        // Validasi sederhana: Pastikan ada data yang dikirim selain ID
+        if (count($input) <= 1) {
+            return $this->fail('Tidak ada data yang dikirim untuk diupdate.');
+        }
+
+        // Simpan ke database
+        // Gunakan $input, bukan $this->request->getVar(...) lagi
+        if ($this->model->save($input)) {
             return $this->respond(['status' => 200, 'message' => 'Event berhasil diupdate']);
         }
+
         return $this->fail($this->model->errors());
     }
 
