@@ -11,30 +11,43 @@ class AuthFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        helper('jwt'); // Panggil helper yang kita buat tadi
+        // 1. Izinkan Preflight Request (CORS) agar tidak dicegat
+        if ($request->getMethod() === 'options') {
+            return;
+        }
+
+        // 2. Load Helper (Pastikan nama file jwt_helper.php)
+        try {
+            helper('jwt');
+        } catch (\Throwable $e) {
+            return Services::response()
+                ->setJSON(['status' => 500, 'message' => 'Internal Error: Helper JWT tidak ditemukan.'])
+                ->setStatusCode(500);
+        }
+
+        // 3. Ambil Token
+        // Panggil fungsi dengan namespace global jika perlu, tapi biasanya langsung bisa
+        if (!function_exists('get_token_from_header')) {
+            return Services::response()
+                ->setJSON(['status' => 500, 'message' => 'Internal Error: Fungsi JWT belum termuat.'])
+                ->setStatusCode(500);
+        }
 
         $token = get_token_from_header();
 
-        // 1. Cek apakah token ada?
         if (!$token) {
             return Services::response()
                 ->setJSON(['status' => 401, 'message' => 'Akses ditolak. Token tidak ditemukan.'])
                 ->setStatusCode(401);
         }
 
-        // 2. Cek apakah token valid?
         $decoded = validate_jwt($token);
         if (!$decoded) {
             return Services::response()
-                ->setJSON(['status' => 401, 'message' => 'Token tidak valid atau sudah kadaluarsa.'])
+                ->setJSON(['status' => 401, 'message' => 'Token tidak valid atau expired.'])
                 ->setStatusCode(401);
         }
-
-        // Jika lolos, request diteruskan ke Controller
     }
 
-    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
-    {
-        // Tidak perlu melakukan apa-apa setelah request
-    }
+    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null) {}
 }
