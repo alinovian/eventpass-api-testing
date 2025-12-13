@@ -7,25 +7,46 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 
-$routes->group('api', function($routes) {
-    
-    // 1. Autentikasi
+// Group API
+$routes->group('api', function ($routes) {
+
+    // ====================================================
+    // 1. RUTE PUBLIK (Bisa diakses tanpa Token)
+    // ====================================================
     $routes->post('register', 'Api\Auth::register');
     $routes->post('login', 'Api\Auth::login');
 
-    // 2. Manajemen Event (CRUD)
-    $routes->resource('events', ['controller' => 'Api\Events']);
-    
-    // 3. Manajemen Master Tamu (CRUD)
-    $routes->resource('guests', ['controller' => 'Api\Guests']);
-    
-    // 4. Manajemen Kategori Tamu (Opsional)
-    $routes->resource('categories', ['controller' => 'Api\Categories']);
 
-    // 5. Transaksi Tiket (Pendaftaran Peserta)
-    $routes->post('tickets', 'Api\Ticket::create'); // Bikin Tiket Baru
-    $routes->get('events/(:num)/participants', 'Api\Ticket::listByEvent/$1'); // Lihat Peserta per Event
+    // ====================================================
+    // 2. RUTE PRIVATE (Wajib Token / Login)
+    // Menggunakan filter 'authFilter' yang sudah dibuat
+    // ====================================================
+    $routes->group('', ['filter' => 'authFilter'], function ($routes) {
 
-    // 6. SCANNER (Fitur Utama Check-in)
-    $routes->post('checkin', 'Api\Scanner::validate');
+        // --- Fitur User Profile ---
+        $routes->get('user/profile', 'Api\User::profile');
+        $routes->post('user/profile', 'Api\User::updateProfile');
+        $routes->post('user/password', 'Api\User::changePassword');
+        $routes->post('user/settings', 'Api\User::updateSettings');
+
+        // --- Manajemen Event (CRUD) ---
+        $routes->resource('events', ['controller' => 'Api\Events']);
+        $routes->get('events/(:num)/attendance', 'Api\Reports::realtime/$1');
+
+        // --- Manajemen Tamu (CRUD) ---
+        $routes->resource('guests', ['controller' => 'Api\Guests']);
+
+        // --- Transaksi Tiket ---
+        $routes->post('tickets', 'Api\Ticket::create');
+        $routes->get('events/(:num)/participants', 'Api\Ticket::listByEvent/$1');
+
+        // --- Scanner & Check-in ---
+        $routes->post('scanner/scan', 'Api\Scanner::validate');
+        $routes->post('scanner/manual-checkin', 'Api\Scanner::manual');
+
+        // --- Laporan ---
+        $routes->get('reports', 'Api\Reports::index');
+        $routes->get('reports/(:num)', 'Api\Reports::show/$1');
+        $routes->get('reports/(:num)/logs', 'Api\Reports::logs/$1');
+    });
 });
